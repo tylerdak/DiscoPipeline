@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Disco Pipeline</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.1.1/tailwind.min.css">
+    <script src="https://js-cdn.music.apple.com/musickit/v1/musickit.js"></script>
+  </head>
+  <body>
+    <nav class="bg-gray-800 py-4">
+      <div class="container mx-auto px-4">
+        <a class="text-white font-bold" href="#">Disco Pipeline</a>
+      </div>
+    </nav>
+    <div class="container mx-auto py-8 flex space-x-16">
+      <h1 class="text-4xl font-bold">All your token are belong to us</h1>
+      <div id="apple-music-button" class="rounded-xl px-6 py-4 bg-pink-400 text-white font-bold uppercase">
+        Connect Apple Music
+      </div>
+      <div id="deezer-button" class="rounded-xl px-6 py-4 bg-blue-400 text-white font-bold uppercase">
+        Connect Deezer
+      </div>
+    </div>
+
+    <script>
+      deezerFlag = false
+      appleMusicFlag = false
+
+      amToken = ''
+      deezerToken = ''
+
+      function sendPostRequestWithTokensIfReady() {
+        if (appleMusicFlag && deezerFlag) {
+          console.log("ready")
+
+          fetch('/submit-data', {
+            method: 'POST',
+            body: JSON.stringify({ amToken: amToken, deezerToken: deezerToken }),
+            headers: {
+              'Content-Type': 'application/json'
+            }
+          }).then(response => {
+            // handle response
+          }).catch(error => {
+            // handle error
+          });
+        }
+      }
+    </script>
+
+    <script>
+  
+
+      appleMusicButton = document.getElementById('apple-music-button');
+
+      appleMusicButton.addEventListener('click', () => {
+        // Configure MusicKit
+        MusicKit.configure({
+			developerToken: '{{dev_token}}',
+			fetchOptions: {
+				headers: {
+				'Referrer-Policy': 'origin-when-cross-origin',
+        'Authorization': 'Bearer {{dev_token}}'
+				}
+			}
+        });
+        // Initialize MusicKit player
+		
+
+        const music = MusicKit.getInstance();
+        
+        console.log(music.api.userToken)
+
+        amToken = music.api.userToken
+
+        appleMusicFlag = true
+
+        appleMusicButton.innerHTML = "Apple Music Connected"
+
+        // Render MusicKit player in #music-player element
+        // player.renderInElement(document.getElementById('music-player'));
+
+        sendPostRequestWithTokensIfReady()
+      });
+    </script>
+
+    <script>
+
+      deezerButton = document.getElementById('deezer-button');
+
+      deezerButton.addEventListener('click', () => {
+
+        let arl = prompt('Please input your Deezer arl (https://deezer.com/).');
+
+        if (arl != '' && arl != null) {
+
+          console.log(arl);
+
+          deezerToken = arl
+
+          deezerFlag = true
+
+          deezerButton.innerHTML = "Deezer Connected"
+
+          sendPostRequestWithTokensIfReady()
+        }
+
+      });
+    </script>
+  </body>
+</html>
