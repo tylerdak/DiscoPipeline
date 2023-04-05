@@ -46,8 +46,9 @@ def submit_data():
     global pipelineInstance
 
     if pipelineInstance is None:
-        pipelineInstance = Pipeline()    
-    pipelineInstance.updateTokens(tokens['amToken'], tokens['deezerToken'])
+        pipelineInstance = Pipeline(tokens['amToken'], tokens['deezerToken'])    
+    else:
+        pipelineInstance.updateTokens(tokens['amToken'], tokens['deezerToken'])
     return redirect('/')
 
 if __name__ == '__main__':
