@@ -1,1 +1,3 @@
-apple-music-python
+deemix
+pytz
+tqdm

@@ -18,7 +18,7 @@
         Connect Apple Music
       </div>
       <div id="deezer-button" class="rounded-xl px-6 py-4 bg-blue-400 text-white font-bold uppercase">
-        Connect Deezer
+        <a href="/deeznuts">Connect Deezer</a>
       </div>
     </div>
 
@@ -27,7 +27,9 @@
       appleMusicFlag = false
 
       amToken = ''
-      deezerToken = ''
+      deezerToken = '{{deezerToken}}'
+
+      if (deezerToken != '') { deezerFlag = true }
 
       function sendPostRequestWithTokensIfReady() {
         if (appleMusicFlag && deezerFlag) {
@@ -87,25 +89,23 @@
     <script>
 
       deezerButton = document.getElementById('deezer-button');
-
-      deezerButton.addEventListener('click', () => {
-
-        let arl = prompt('Please input your Deezer arl (https://deezer.com/).');
-
-        if (arl != '' && arl != null) {
-
-          console.log(arl);
-
-          deezerToken = arl
-
-          deezerFlag = true
-
-          deezerButton.innerHTML = "Deezer Connected"
-
-          sendPostRequestWithTokensIfReady()
-        }
-
-      });
+      if (deezerFlag) {
+        deezerButton.innerHTML = "Deezer Connected"
+        // deezerButton.style.backgroundColor = 'yellow';
+        // deezerButton.style.color = 'black';
+        // deezerButton.style.padding = '10px';
+        deezerButton.style.transition = 'all 0.3s ease';
+        deezerButton.addEventListener('mouseenter', () => {
+          deezerButton.style.backgroundColor = 'red';
+          deezerButton.style.color = 'white';
+          deezerButton.innerHTML = '<a href="/deezerLogOut">Sign Out Deezer</a>';
+        });
+        deezerButton.addEventListener('mouseleave', () => {
+          deezerButton.style.backgroundColor = '#60A5FA';
+          deezerButton.style.color = 'white';
+          deezerButton.textContent = 'Deezer Connected';
+        });
+      }
     </script>
   </body>
 </html>
