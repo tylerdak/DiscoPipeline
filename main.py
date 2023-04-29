@@ -11,6 +11,8 @@ import json
 from AMTokenGeneration import *
 from pipeline import Pipeline
 
+from dbstuff import getUserTokens, setUserTokens
+
 # am = AMHandler.AppleMusic(secret_key,key_id,team_id)
 # results = am.searchLibrary('inferno rich edwards', types=['songs'],limit=5)
 
@@ -19,9 +21,17 @@ from pipeline import Pipeline
 
 app = Flask(__name__)
 
-pipelineInstance: Pipeline|NoneType = None
+# prepare a dev token for the auto-initiated Pipeline to use.
+# this gets updated any time a user visits the endpoint,
+# but could probably just update every time self.repeated runs for simplicity 
 
-serverSetDeezerToken = None
+# Pipeline just uses the last AMToken anyway, so as it stands a user has to visit the site
+# once every 6 months at least for it to not shit itself
+AMToken.generate()
+
+initAMToken, initDToken = getUserTokens()
+pipelineInstance: Pipeline|NoneType = Pipeline(initAMToken,initDToken)
+
 
 @app.after_request
 def add_header(response):
@@ -41,20 +51,20 @@ def add_header(response):
 
 @app.route('/')
 def index():
-    global serverSetDeezerToken
-    # print("gend dtoken:", serverSetDeezerToken)
-    if serverSetDeezerToken is not None:
-        dToken = serverSetDeezerToken
-    else:
-        dToken = ""
+    aToken,dToken = getUserTokens()
+    # print("getUserTokens: ", aToken,dToken)
+    aToken=aToken if aToken != None else ""
+    dToken=dToken if dToken != None else ""
 
-    return render_template('index.html', dev_token=AMToken.generate(), deezerToken=dToken)
+    return render_template('index.html', dev_token=AMToken.generate(), amToken=aToken,deezerToken=dToken)
 
 @app.route('/submit-data', methods=['POST'])
 def submit_data():
     tokens = json.loads(request.get_data())
 
     global pipelineInstance
+    # print("about to set tokens: ", tokens['amToken'], tokens['deezerToken'])
+    setUserTokens(tokens['amToken'],tokens['deezerToken'])
 
     if pipelineInstance is None:
         pipelineInstance = Pipeline(tokens['amToken'], tokens['deezerToken'])    
@@ -69,11 +79,15 @@ def deezerRedirect():
 
 @app.route('/incomingDeezerCode')
 def incomingDeezerCode():
-    global serverSetDeezerToken
     response = requests.get(f"https://connect.deezer.com/oauth/access_token.php?app_id={secret.deezerAppID}&secret={secret.deezerKey}&code={request.args.get('code')}")
     if response.status_code == 200:
         try:
-            serverSetDeezerToken = str(response.content).split('=',1)[1].split('&')[0]
+            dToken = str(response.content).split('=',1)[1].split('&')[0]
+            # set only the dToken, leaving the AMToken the same as before
+            print("setting dToken: ",dToken)
+            setUserTokens(getUserTokens()[0],dToken)
+            if pipelineInstance is not None:
+                pipelineInstance.deezerToken = dToken
         except IndexError:
             # print(response.content)
             pass
@@ -83,10 +97,16 @@ def incomingDeezerCode():
 
 @app.route('/deezerLogOut')
 def deezerLogOut():
-    global serverSetDeezerToken
-    serverSetDeezerToken = None
+    setUserTokens(getUserTokens()[0],None)
     if pipelineInstance is not None:
         pipelineInstance.deezerToken = None
+    return redirect("/")
+
+@app.route('/amLogOut')
+def amLogOut():
+    setUserTokens(None,getUserTokens()[1])
+    if pipelineInstance is not None:
+        pipelineInstance.amToken = None
     return redirect("/")
 
 

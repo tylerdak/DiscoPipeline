@@ -42,6 +42,7 @@ class Pipeline:
 		# print("tokens are updated")
 
 	def repeated(self):
+		print("\n\n\nBeginning cycle...")
 
 		if AMToken.last is None:
 			print("Apple Music devtoken has not been stored yet... returning for safety")

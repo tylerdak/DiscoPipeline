@@ -45,11 +45,19 @@ def lastSync():
 	return datestamp
 		
 def checkLater(amTrack: Album):
+	try:
+		precheck = tracksToCheckLater.find({"trackData.id": amTrack.amData.get("id")})
+		if len(list(precheck)) > 0:
+			print(f"Album with ID {amTrack.amData.get('id')} is already in checkLater queue")
+			return
+	except:
+		print("Couldn't properly check for this data's ID in checkLater:\n",amTrack.amData)
+	
 	tracksToCheckLater.insert_one({
 		"datestamp":amTrack.releaseDate,
 		"trackData": amTrack.amData
 	})
-	
+
 def check():
 	currTime = datetime.datetime.now()
 	query = {"datestamp": {'$lt': currTime}}
@@ -71,9 +79,11 @@ def check():
 appleMusicUserTokenFilter = {"key": "appleMusicUserToken"}
 deezerUserTokenFilter = {"key": "deezerUserToken"}
 def setUserTokens(appleMusic,deezerToken):
-	keychain.update_one(appleMusicUserTokenFilter, {"$setOnInsert": {"value": (appleMusic if appleMusic != None else "")}}, upsert=True)
-	keychain.update_one(deezerUserTokenFilter, {"$setOnInsert": {"value": (deezerToken if deezerToken != None else "")}}, upsert=True)
+	# print("received tokens: ", appleMusic, deezerToken)
+	keychain.update_one(appleMusicUserTokenFilter, {"$set": {"value": (appleMusic if appleMusic != None else "")}}, upsert=True)
+	keychain.update_one(deezerUserTokenFilter, {"$set": {"value": (deezerToken if deezerToken != None else "")}}, upsert=True)
 
 def getUserTokens():
-	am, dz = keychain.find_one(appleMusicUserTokenFilter), keychain.find_one(deezerUserTokenFilter)
-	am if am != "" else None, dz if dz != "" else None
+	amResult, dResult = keychain.find_one(appleMusicUserTokenFilter), keychain.find_one(deezerUserTokenFilter)
+	am, dz = amResult.get("value") if amResult is not None else "", dResult.get("value") if dResult is not None else ""
+	return am if am != "" else None, dz if dz != "" else None
