@@ -1,6 +1,7 @@
 from datetime import date
 import datetime
 from fallback import alt
+import pytz
 
 class Album:
 	amData: dict
@@ -33,8 +34,14 @@ class Album:
 
 		self.title = self.attrs().get("name")
 		self.artistName = self.attrs().get("artistName")
-		self.dateAddedString = self.attrs().get("dateAdded")
-		self.dateAdded = datetime.datetime.fromisoformat(self.dateAddedString)
+		tempDateString =  self.attrs().get("dateAdded")
+		try:
+			if tempDateString[-1] == 'Z':
+				tempDateString = tempDateString[:-1]
+		except IndexError:
+			pass
+		self.dateAddedString = tempDateString
+		self.dateAdded = datetime.datetime.fromisoformat(self.dateAddedString).replace(tzinfo=pytz.utc)
 		self.am_storeURL = self.catAttrs().get("url")
 		self.releaseDateStr = self.catAttrs().get("releaseDate")
 

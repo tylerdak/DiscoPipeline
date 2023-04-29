@@ -1,3 +1,7 @@
 deemix
 pytz
 tqdm
+flask
+PyJWT
+pymongo
+cryptography

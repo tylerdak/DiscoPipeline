@@ -49,8 +49,11 @@ class AMController:
 				print("Skipping unreleased album: ", thisAlbum.title, thisAlbum.artistName, thisAlbum.releaseDate)
 				dbstuff.checkLater(thisAlbum)
 				continue
-
-			if thisAlbum.dateAdded > dateMinimum:
+			print("\n\n")
+			print(f"thisAlbum: {thisAlbum.artistName} - {thisAlbum.title}")
+			print(f"thisAlbum.dateAdded: {thisAlbum.dateAdded.date()}")
+			print(f"dateMinimum: {dateMinimum.date()}")
+			if thisAlbum.dateAdded.date() >= dateMinimum.date():
 				albumsArr.append(thisAlbum)
 			else:
 				# print(f"end of list (next was {str(thisAlbum.dateAdded)})")
@@ -91,7 +94,7 @@ class AMController:
 			responseDict = json.loads(response.content)
 			next_url = responseDict.get("next")
 		except ValueError:
-			print("oh god oh fuck")
+			print("oh god oh fuck: ", response.content)
 			next_url = None
 
 		albumsArrAdd, dateLimitReached = AMController.parseAlbumsFromResponse(responseDict,lastDate)

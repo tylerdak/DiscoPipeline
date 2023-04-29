@@ -131,16 +131,21 @@ class DeezerController:
 						responseError = responseDict.get("error") 
 					except ValueError:
 						responseError = { "code": 408, "message": f"Unable to unpack response.content: {response.content}", "type": "DictUnpackError"}
+					except AttributeError:
+						if type(responseDict) == bool:
+							responseError = None
+						else:
+							responseError = { "code": 409, "message": f"Unable to unpack response.content: {response.content}", "type": "DictUnpackError"}
 
 					if responseError is not None:
 						code = responseError.get("code")
 						message = responseError.get("message")
-						type = responseError.get("type")
+						typed = responseError.get("type")
 
-						if type == "ParameterException":
+						if typed == "ParameterException":
 							tqdm.tqdm.write(f"No new tracks in batch {bi}...")
 						else:
-							tqdm.tqdm.write(f"\nUnhandled Error Type (Batch {bi}): {type}")
+							tqdm.tqdm.write(f"\nUnhandled Error Type (Batch {bi}): {typed}")
 							tqdm.tqdm.write(f"Details: [Error {code}]: {message}\n")
 							
 							rejectTracks += batch

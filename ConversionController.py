@@ -94,7 +94,10 @@ class ConversionController:
 					else:
 						rejectAlbums.append(album)
 						continue
-		print(f"Done converting. Success Rate: {int((len(successAlbums)/len(albums))*10000)/100}%")
+		try:
+			print(f"Done converting. Success Rate: {int((len(successAlbums)/len(albums))*10000)/100}%")
+		except ZeroDivisionError:
+			print("No albums to process.")
 		return successAlbums, rejectAlbums
 	
 	def convertAlbumsToTracks(albums: list[Album], deezerToken: str):

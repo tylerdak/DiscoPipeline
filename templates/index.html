@@ -70,19 +70,21 @@
 		
 
         const music = MusicKit.getInstance();
+        music.authorize().then(function(token) {
         
-        console.log(music.api.userToken)
+          console.log(music.api.userToken)
 
-        amToken = music.api.userToken
+          amToken = music.api.userToken
 
-        appleMusicFlag = true
+          appleMusicFlag = true
 
-        appleMusicButton.innerHTML = "Apple Music Connected"
+          appleMusicButton.innerHTML = "Apple Music Connected"
 
-        // Render MusicKit player in #music-player element
-        // player.renderInElement(document.getElementById('music-player'));
+          // Render MusicKit player in #music-player element
+          // player.renderInElement(document.getElementById('music-player'));
 
-        sendPostRequestWithTokensIfReady()
+          sendPostRequestWithTokensIfReady()
+        })
       });
     </script>
 

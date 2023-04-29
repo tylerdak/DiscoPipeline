@@ -20,7 +20,7 @@ class Pipeline:
 	deezerToken = None
 	
 	def setTimer(self):
-		self.timer = threading.Timer(30.0, self.repeated)
+		self.timer = threading.Timer(600.0, self.repeated)
 		self.timer.start()
 
 	def __init__(self, amToken=None, deezerToken=None) -> None:
@@ -64,6 +64,13 @@ class Pipeline:
 			os.mkdir(logfolder)
 
 			albums = self.getAppleMusicLibraryList(logfolder)
+			if len(albums) == 0:
+				print("No albums found, skipping conversion for this round.")
+				# dbstuff.insertSyncLog(["none"])
+				self.setTimer()
+				return
+
+
 			success, noMatch = self.addDeezerLinks(albums=albums)
 			rejectAlbums += noMatch
 
