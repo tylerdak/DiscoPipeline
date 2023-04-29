@@ -16,6 +16,7 @@ db = client["DiscoPipeline"]
 
 syncLogs: Collection = db["syncLogs"]
 tracksToCheckLater: Collection = db["checkLater"]
+keychain: Collection = db["keychain"]
 
 def insertSyncLog(errorFlags, null=False):
 	syncLogs.insert_one({
@@ -64,3 +65,15 @@ def check():
 	print("Checked later tracks: ", len(tracks))
 
 	return tracks
+
+
+# KEYCHAIN STUFF
+appleMusicUserTokenFilter = {"key": "appleMusicUserToken"}
+deezerUserTokenFilter = {"key": "deezerUserToken"}
+def setUserTokens(appleMusic,deezerToken):
+	keychain.update_one(appleMusicUserTokenFilter, {"$setOnInsert": {"value": (appleMusic if appleMusic != None else "")}}, upsert=True)
+	keychain.update_one(deezerUserTokenFilter, {"$setOnInsert": {"value": (deezerToken if deezerToken != None else "")}}, upsert=True)
+
+def getUserTokens():
+	am, dz = keychain.find_one(appleMusicUserTokenFilter), keychain.find_one(deezerUserTokenFilter)
+	am if am != "" else None, dz if dz != "" else None
