@@ -66,8 +66,8 @@ def check():
 	tracks: list[Album] = []
 	
 	for track in results:
-		tracks.append(Album(amData=results["trackData"]))
-		print(results["trackData"])
+		tracks.append(Album(amData=track["trackData"]))
+		print(track["trackData"])
 
 	tracksToCheckLater.delete_many(query)
 	print("Checked later tracks: ", len(tracks))
