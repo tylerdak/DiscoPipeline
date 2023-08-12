@@ -2,8 +2,10 @@ from tqdm import tqdm
 from DeemixController import DeemixController as dc
 from Song import Album
 
+from secret import deezerARL
+
 # USER ARL
-arl = "7b49d9a1b0adc73404bd86a18a6bb7e5cc8b7a5d81bcd0dcb3cbcca812c79ca9ba52df5b1eee110427fc2cbb25187ce6e261dc1e988449168e0635ba312d4cc26f14ac8211c915348587c1cb2555dcbfc1027b06ba94b35164d70f7512f42b0b"
+arl = deezerARL
 
 # once we have the albums, we need to loop over them, and then add each of them to a deezer playlist... maybe favorites would be easier?
 playlistAdditionOutput = {"code":200, "playlists":[11274921824,11274921804,11274921764,11274921744,11274921724,11274921684]}
