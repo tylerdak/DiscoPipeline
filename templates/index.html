@@ -8,20 +8,64 @@
   </head>
   <body>
     <nav class="bg-gray-800 py-4">
-      <div class="container mx-auto px-4">
+      <div class="container mx-auto px-4 flex justify-between">
         <a class="text-white font-bold" href="#">Disco Pipeline</a>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+          {% for category,message in messages %}
+            <p class="p-2 
+            {% if category == 'error' %}
+            border-red-600 
+            {% endif %}
+            {% if category == 'success' %}
+            border-green-600 
+            {% endif %}
+            border-2 rounded-md text-white">
+              {{ message }} <br>
+            </p>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
       </div>
     </nav>
+    <div class="m-10">
     <div class="container mx-auto py-8 flex flex-wrap space-x-16 space-y-8">
       <h1 class="text-4xl font-bold">All your token are belong to us</h1>
+      {% if dev_token != "" %}
       <div id="apple-music-button" class="rounded-xl px-6 py-4 bg-pink-400 text-white font-bold uppercase">
         Connect Apple Music
       </div>
+      {% else %}
+      <div id="" class="rounded-xl px-6 py-4 bg-gray-700 text-white font-bold uppercase">
+          Set Apple Developer Details
+      </div>
+      {% endif %}
       <div id="deezer-button" class="rounded-xl px-6 py-4 bg-blue-400 text-white font-bold uppercase">
         <a href="/deeznuts">Connect Deezer</a>
       </div>
     </div>
-    <p>Connect Apple Music and Deezer to kickstart the pipeline</p>
+    <div class="">
+      <h1 class="font-bold text-4xl my-4">Settings and Keys and Stuff (probably maybe functional)</h1>
+      <form action="/settings" method="post" class="flex flex-col justify-evenly">
+        <input type="submit" value="Save">
+        {% for settingData in settings %}
+          <label for="key_id">{{ settingData.name }}</label>
+          <input type="text" placeholder="{{ settingData.name }}" value="{{ settingData.value }}" name="{{ settingData.key }}">
+        {% endfor %}
+        <!-- <label for="key_id">Apple Developer Key</label>
+        <input type="text" placeholder="Apple Developer Key" value="{{ apple_dev_key_id }}" name="apple_dev_key_id">
+        <label for="team_id">Apple Developer Team ID</label>
+        <input type="text" placeholder="Apple Developer Team ID" value="{{ apple_dev_team_id }}" name="apple_dev_team_id">
+        <label for="deezerKey">Deezer Developer Key</label>
+        <input type="text" placeholder="Deezer Developer Key" value="{{ deezer_dev_key }}" name="deezer_dev_key">
+        <label for="deezerAppID">Deezer App ID</label>
+        <input type="text" placeholder="Deezer App ID" value="{{ deezerAppID }}" name="deezerAppID">
+        <label for="deezerARL">Deezer ARL</label>
+        <input type="text" placeholder="Deezer ARL" value="{{ deezerARL }}" name="deezerARL"> -->
+        <input type="submit" value="Save">
+      </form>
+    </div>
+  </div>
 
     <script>
       deezerFlag = false

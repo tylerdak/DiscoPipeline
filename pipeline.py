@@ -41,10 +41,28 @@ class Pipeline:
 		self.deezerToken = deez
 		# print("tokens are updated")
 
+	settingsKeys = {"apple_dev_key_id":"Apple Developer Key","apple_dev_team_id":"Apple Developer Team ID","deezer_dev_key":"Deezer Developer Key","deezerAppID":"Deezer App ID","deezerARL":"Deezer ARL"}
+	def areSettingsMissing():
+		results = dbstuff.getSettings(list(Pipeline.settingsKeys.keys()))
+
+		for result in results.items():
+			if result[1] == None:
+				return True
+			if result[1].get("value") in [None,""]:
+				print("Could not find value for ",result.get("key"))
+				return True
+		return False
+
 	def repeated(self):
+		print("Cycle disabled...")
+		return
+
 		print("\n\n\nBeginning cycle...")
 
-		if AMToken.last is None:
+		if Pipeline.areSettingsMissing():
+			print("Could not find appropriate settings in database.")
+			print("User must fill out settings form and submit.")
+		elif AMToken.last is None:
 			print("Apple Music devtoken has not been stored yet... returning for safety")
 		elif self.amToken is None or self.deezerToken is None:
 			print("At least one of two crucial music service tokens is set to none (am, deez): ", self.amToken, self.deezerToken)
@@ -97,7 +115,7 @@ class Pipeline:
 					print(f"{album.artistName} - {album.title}")
 
 			# USER ARL
-			arl = secret.deezerARL
+			arl = secret.deezerARL()
 
 			# once we have the albums, we need to loop over them, and then add each of them to a deezer playlist... maybe favorites would be easier?
 			playlistAdditionOutput = DeezerController(deezerToken=self.deezerToken).addTracksToPlaylist(tracklist=successTracks)

@@ -87,3 +87,27 @@ def getUserTokens():
 	amResult, dResult = keychain.find_one(appleMusicUserTokenFilter), keychain.find_one(deezerUserTokenFilter)
 	am, dz = amResult.get("value") if amResult is not None else "", dResult.get("value") if dResult is not None else ""
 	return am if am != "" else None, dz if dz != "" else None
+
+def getSettings(keys: list[str]|str):
+	if type(keys) == str:
+		key = keys
+		return keychain.find_one({"key":key})
+	else:
+		results = {}
+		for key in keys:
+			result = keychain.find_one({"key":key})
+			results[key]=result
+		return results
+
+def settingConstructor(key: str, value, name: str|None = None):
+	return {"key":key, "value":value, "name":name}
+
+def setSettings(constructed: list[dict]):
+	for construct in constructed:
+		value = construct["value"]
+		value = value if value != "" else None
+		key = construct["key"]
+		name = construct["name"]
+		name = name if name != "" else None
+		
+		keychain.update_one({"key":key}, {"$set": {"value": value, "name": name}}, upsert=True)

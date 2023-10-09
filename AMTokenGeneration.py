@@ -7,8 +7,13 @@ class AMToken:
     last: str|NoneType = None
 
     def generate():
-        key_id = secret.key_id
-        team_id = secret.team_id
+        key_id = secret.key_id()
+        team_id = secret.team_id()
+
+        if None in [key_id,team_id]:
+            print([key_id,team_id])
+            return None
+
         auth_key_file = secret.secret_key_filename
 
         with open(auth_key_file, 'r') as f:

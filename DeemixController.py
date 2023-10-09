@@ -5,6 +5,8 @@ from deemix.settings import load as loadSettings
 from deemix.downloader import Downloader
 import deemix
 
+import json
+
 class DeemixController:
 	def downloadPlaylist(playlistID: str|int,arl: str):
 		try:
@@ -27,3 +29,26 @@ class DeemixController:
 			return True
 		except:
 			return False
+		
+	configFileLocation = 'config/deemix/config.json'
+	def editSaveLocation(saveLocationPath: str):
+
+		with open(DeemixController.configFileLocation) as f:
+			data = json.load(f)
+
+		data["downloadLocation"] = saveLocationPath
+
+		with open(DeemixController.configFileLocation, 'w') as f:
+			json.dump(data, f)
+
+	def readSaveLocation():
+		try:
+			with open(DeemixController.configFileLocation) as f:
+				data = json.load(f)
+			dlLocation: str|None = data.get("downloadLocation")
+			if dlLocation:
+				return dlLocation.replace('\\','\\')
+			else:
+				return ""
+		except KeyError:
+			return ""
