@@ -70,6 +70,10 @@ class Pipeline:
 		else:
 			# continue with normal 
 
+			dzController = DeezerController(deezerToken=self.deezerToken)
+			# clean playlist list first
+			dzController.deleteExcessPlaylists(500)
+
 			# at the end we'll output this list somewhere,
 			# but this is the list of albums that couldn't get
 			# added to the playlist for whatever reason
@@ -118,7 +122,7 @@ class Pipeline:
 			arl = secret.deezerARL()
 
 			# once we have the albums, we need to loop over them, and then add each of them to a deezer playlist... maybe favorites would be easier?
-			playlistAdditionOutput = DeezerController(deezerToken=self.deezerToken).addTracksToPlaylist(tracklist=successTracks)
+			playlistAdditionOutput = dzController.addTracksToPlaylist(tracklist=successTracks)
 
 			paoCode = playlistAdditionOutput.get("code")
 

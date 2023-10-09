@@ -6,3 +6,4 @@ logs/*
 **/*.p8
 
 config/*
+!config/example/
