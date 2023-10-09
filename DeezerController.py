@@ -172,3 +172,101 @@ class DeezerController:
 					"rejectTracks": rejectTracks,
 					"playlists": playlists
 				}
+
+
+	def deleteExcessPlaylists(self, playlistCountLimit):
+		if self.token is None:
+			return {"code": 401, "error": "I can't function without a token, dumbass"}
+		else:
+			userID = self.getUserID()
+			if userID is None:
+				return {"code": 402, "error": "Failed to fetch user ID"}
+
+			userPlaylistsAPI = f"https://api.deezer.com/user/{userID}/playlists"
+			headers = {"access_token": self.token}
+			response = requests.get(userPlaylistsAPI, headers=headers)
+
+			if response.status_code == 200:
+				playlists = response.json()["data"]
+
+				# rate limiting groundwork
+				requests_made = 0
+				last_request_time = None
+				rate_limit = 50
+				# timeframe in seconds
+				rate_timeframe = 5
+
+				while "next" in response.json():
+					if requests_made >= rate_limit and last_request_time is not None:
+						time_since_last_request = time.time() - last_request_time
+						if time_since_last_request < rate_timeframe:
+							time_to_wait = rate_timeframe - time_since_last_request
+							tqdm.tqdm.write(f"[{datetime.datetime.now().time()}]: Sleeping...")
+							time.sleep(time_to_wait)
+							tqdm.tqdm.write(f"[{datetime.datetime.now().time()}]: Awoken!")
+							requests_made = 0
+							last_request_time = None
+					next_page = response.json()["next"]
+					response = requests.get(next_page, headers=headers)
+					# update rate limiting variables
+					requests_made += 1
+					last_request_time = time.time()
+					playlists.extend(response.json()["data"])
+
+
+				disco_playlists = [pl for pl in playlists if pl["title"].startswith("discoPipeline")]
+				disco_playlists.sort(key=lambda pl: pl["creation_date"], reverse=True)
+
+				# check first few playlists (these should go new to old, such that the 500 newest get kept)
+				# titlesonlyplease = [p["title"] for p in disco_playlists]
+				# print(titlesonlyplease[0:10])
+				print(len(disco_playlists), "to delete")
+
+				if len(disco_playlists) > playlistCountLimit:
+					playlists_to_delete = disco_playlists[playlistCountLimit:]
+
+					# rate limiting groundwork
+					requests_made = 0
+					last_request_time = None
+					rate_limit = 50
+					# timeframe in seconds
+					rate_timeframe = 5
+
+					for playlist in playlists_to_delete:
+						if requests_made >= rate_limit and last_request_time is not None:
+							time_since_last_request = time.time() - last_request_time
+							if time_since_last_request < rate_timeframe:
+								time_to_wait = rate_timeframe - time_since_last_request
+								tqdm.tqdm.write(f"[{datetime.datetime.now().time()}]: Sleeping...")
+								time.sleep(time_to_wait)
+								tqdm.tqdm.write(f"[{datetime.datetime.now().time()}]: Awoken!")
+								requests_made = 0
+								last_request_time = None
+
+						delete_response = requests.delete(f"https://api.deezer.com/playlist/{playlist['id']}", params=headers)
+						if delete_response.status_code == 200:
+							print(f"Deleted playlist: {playlist['title']}")
+
+							# logging logic
+							# # file compatible datestamp
+							# datestamp = datetime.datetime.now().isoformat().replace(":","").replace(".","-")
+							# # create logs folder
+							# logfolder = "logs"
+							# fileLabel = f"response_{playlist['id']}_{playlist['title']}_{datestamp}"
+
+							# with open(f"{logfolder}/debug/{fileLabel}.log","w") as f:
+							# 	f.write(delete_response.text)
+							# 	f.close()
+						else:
+							print(f"Failed to delete playlist: {playlist['title']}")
+
+						# update rate limiting variables
+						requests_made += 1
+						last_request_time = time.time()
+
+					return {"code": 200, "message": "Excess playlists deleted"}
+				else:
+					return {"code": 201, "message": "No excess playlists to delete"}
+
+			else:
+				return {"code": 403, "error": "Failed to fetch user playlists"}

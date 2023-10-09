@@ -75,7 +75,7 @@ def submit_data():
 @app.route('/deeznuts', methods=['GET'])
 def deezerRedirect():
     redirectURI = request.host_url+"incomingDeezerCode"
-    return redirect(f"https://connect.deezer.com/oauth/auth.php?app_id={secret.deezerAppID}&redirect_uri={redirectURI}&perms=basic_access,offline_access,manage_library")
+    return redirect(f"https://connect.deezer.com/oauth/auth.php?app_id={secret.deezerAppID}&redirect_uri={redirectURI}&perms=basic_access,offline_access,manage_library,delete_library")
 
 @app.route('/incomingDeezerCode')
 def incomingDeezerCode():
