@@ -54,9 +54,7 @@ class Pipeline:
 		return False
 
 	def repeated(self):
-		print("Cycle disabled...")
-		return
-
+		
 		print("\n\n\nBeginning cycle...")
 
 		if Pipeline.areSettingsMissing():
