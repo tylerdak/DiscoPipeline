@@ -6,7 +6,7 @@ from types import NoneType
 
 import requests
 from DeemixController import DeemixController
-from secret import secret_key
+# from secretsHandler import secret_key
 from flask import Flask, flash, redirect, render_template, request
 import json
 from AMTokenGeneration import *
@@ -18,12 +18,6 @@ from dbstuff import getUserTokens, setUserTokens, settingConstructor, setSetting
 
 def randomString(length: int = 32):
 	return ''.join(random.choices(string.ascii_letters + string.digits,k=length))
-
-# am = AMHandler.AppleMusic(secret_key,key_id,team_id)
-# results = am.searchLibrary('inferno rich edwards', types=['songs'],limit=5)
-
-# for item in results['results']['songs']['data']:
-#     print(item['attributes'])
 
 app = Flask(__name__)
 app.secret_key = randomString()
@@ -107,11 +101,11 @@ def submit_data():
 @app.route('/deeznuts', methods=['GET'])
 def deezerRedirect():
     redirectURI = request.host_url+"incomingDeezerCode"
-    return redirect(f"https://connect.deezer.com/oauth/auth.php?app_id={secret.deezerAppID}&redirect_uri={redirectURI}&perms=basic_access,offline_access,manage_library,delete_library")
+    return redirect(f"https://connect.deezer.com/oauth/auth.php?app_id={secretsHandler.deezerAppID}&redirect_uri={redirectURI}&perms=basic_access,offline_access,manage_library,delete_library")
 
 @app.route('/incomingDeezerCode')
 def incomingDeezerCode():
-    response = requests.get(f"https://connect.deezer.com/oauth/access_token.php?app_id={secret.deezerAppID()}&secret={secret.deezerKey()}&code={request.args.get('code')}")
+    response = requests.get(f"https://connect.deezer.com/oauth/access_token.php?app_id={secretsHandler.deezerAppID()}&secret={secretsHandler.deezerKey()}&code={request.args.get('code')}")
     if response.status_code == 200:
         try:
             dToken = str(response.content).split('=',1)[1].split('&')[0]

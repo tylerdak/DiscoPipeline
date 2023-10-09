@@ -2,7 +2,7 @@ from tqdm import tqdm
 from DeemixController import DeemixController as dc
 from Song import Album
 
-from secret import deezerARL
+from secretsHandler import deezerARL
 
 # USER ARL
 arl = deezerARL

@@ -12,7 +12,7 @@ from ConversionController import ConversionController
 from DeemixController import DeemixController
 from DeezerController import DeezerController
 from Song import Album
-import secret
+import secretsHandler
 
 
 class Pipeline:
@@ -119,7 +119,7 @@ class Pipeline:
 					print(f"{album.artistName} - {album.title}")
 
 			# USER ARL
-			arl = secret.deezerARL()
+			arl = secretsHandler.deezerARL()
 
 			# once we have the albums, we need to loop over them, and then add each of them to a deezer playlist... maybe favorites would be easier?
 			playlistAdditionOutput = dzController.addTracksToPlaylist(tracklist=successTracks)
