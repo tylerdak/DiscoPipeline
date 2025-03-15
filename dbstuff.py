@@ -80,7 +80,13 @@ appleMusicUserTokenFilter = {"key": "appleMusicUserToken"}
 deezerUserTokenFilter = {"key": "deezerUserToken"}
 def setUserTokens(appleMusic,deezerToken):
 	# print("received tokens: ", appleMusic, deezerToken)
+	setAppleMusicTokenIndividually(appleMusic)
+	setDeezerTokenIndividually(deezerToken)
+	
+def setAppleMusicTokenIndividually(appleMusic):
 	keychain.update_one(appleMusicUserTokenFilter, {"$set": {"value": (appleMusic if appleMusic != None else "")}}, upsert=True)
+
+def setDeezerTokenIndividually(deezerToken):
 	keychain.update_one(deezerUserTokenFilter, {"$set": {"value": (deezerToken if deezerToken != None else "")}}, upsert=True)
 
 def getUserTokens():

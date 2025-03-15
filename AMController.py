@@ -90,15 +90,42 @@ class AMController:
 	       	params=AMController.standardParams,
 			headers=AMController.standardHeaders
 		)
+  
+		responseDict = None
 		try:
 			responseDict = json.loads(response.content)
 			next_url = responseDict.get("next")
 		except ValueError:
 			print("oh god oh fuck: ", response.content)
 			next_url = None
+   
+			if responseDict == None:
+				# report errors in the second return parameter
+				return None, f"Could not load response as JSON into responseDict: {response.content}"
 
-		albumsArrAdd, dateLimitReached = AMController.parseAlbumsFromResponse(responseDict,lastDate)
-		albumsArr += albumsArrAdd
+		print(responseDict, response.content)
+  
+		if responseDict.get("data"):
+			albumsArrAdd, dateLimitReached = AMController.parseAlbumsFromResponse(responseDict,lastDate)
+			albumsArr += albumsArrAdd
+		else:
+			errors = responseDict.get("errors")
+			if not errors:
+				return None, f"Could not parse response (no data or errors properties found): {response.content}"
+			if len(errors) > 1:
+				return None, errors
+				pass
+			else:
+				theError = errors[0]
+				if not theError:
+					return None, f"Found errors array in response.content but the only entry was false: {theError}"
+				else:
+					responseStatus = theError.get('status')
+					if responseStatus == '403':
+						dbstuff.setAppleMusicTokenIndividually(None)
+						return None, f"Invalid Apple Music Authentication, cleared token"
+					else:
+						return None, f"Apple Music error: {theError}"
 
 		albumsArr += dbstuff.check()
 
@@ -141,7 +168,7 @@ class AMController:
 		print("Album Count: ",len(albumsArr))
 
 		albumsExportable = Album.exportList(albumsArr)
-		return albumsArr
+		return albumsArr, None
 
 		# dbstuff.insertSyncLog(albumsExportable)
 		

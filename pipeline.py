@@ -84,7 +84,22 @@ class Pipeline:
 			logfolder = f"logs/log_{datestamp}"
 			os.mkdir(logfolder)
 
-			albums = self.getAppleMusicLibraryList(logfolder)
+			albums, error = self.getAppleMusicLibraryList(logfolder)
+
+			if (albums == None):
+				errorType = type(error)
+				if errorType in [list,dict]:
+					print("Encountered several errors in self.getAppleMusicLibraryList:",error)
+				else:
+					print("Encountered an error in self.getAppleMusicLibraryList:", error if error else "Unknown error.")
+				self.setTimer()
+				return
+			elif error != None:
+				print(f"Warning from self.getAppleMusicLibraryList: {error}")
+				
+					
+
+
 			if len(albums) == 0:
 				print("No albums found, skipping conversion for this round.")
 				# dbstuff.insertSyncLog(["none"])
